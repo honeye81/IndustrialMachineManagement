@@ -1,115 +1,249 @@
 ﻿@page "/"
+@rendermode @(new InteractiveServerRenderMode())
 @using IndustrialMachineManagement.Models
 @using IndustrialMachineManagement.Services
 @inject IMachineService MachineService
 
-<div class="management-central">
-    <div class="management-header">
-        <h1>Management Central</h1>
-        <div class="nav-icons">
-            <span class="nav-icon"><i class="bi bi-chat"></i></span>
-            <span class="nav-icon"><i class="bi bi-bar-chart"></i></span>
-            <span class="nav-icon"><i class="bi bi-gear"></i></span>
+<div class="page-container">
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="left-nav">
+            <span class="brand">Management Central</span>
+            <span class="nav-item">Dashboard</span>
+        </div>
+        <div class="right-nav">
+            <button class="icon-button">💬</button>
+            <button class="icon-button">📊</button>
+            <button class="icon-button">⚙️</button>
+            <span class="manager">Manager</span>
         </div>
     </div>
 
-    <div class="dashboard-section">
+    <!-- Main Content -->
+    <div class="main-content">
         <h2>Dashboard</h2>
         <p class="subtitle">Overview of your Internet of Things</p>
-        <p class="user-type">Manager User</p>
 
-        <div class="dashboard-content">
-            <!-- Daily Stats -->
+        <div class="dashboard-grid">
+            <!-- Daily Stats Card -->
             <div class="stats-card">
                 <div class="card-header">
-                    <h3>Daily Stats</h3>
-                    <button class="refresh-btn" @onclick="LoadMachinesAsync">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
+                    <span>Daily Stats</span>
+                    <button class="refresh-button">🔄</button>
                 </div>
-
-                <div class="stats-list">
+                <div class="stats-content">
                     <div class="stat-item">
-                        <i class="bi bi-cpu"></i>
+                        <span class="stat-icon">📱</span>
                         <div class="stat-info">
                             <span>Total Devices</span>
-                            <h4>@(_machines?.Count ?? 0)</h4>
+                            <div class="stat-value">@(_machines?.Count ?? 0)</div>
                         </div>
                     </div>
                     <div class="stat-item">
-                        <i class="bi bi-plus-circle"></i>
+                        <span class="stat-icon">➕</span>
                         <div class="stat-info">
                             <span>New Devices</span>
-                            <h4>@(_machines?.Count(m => m.LastDataReceived.Date == DateTime.Today) ?? 0)</h4>
+                            <div class="stat-value">@(_machines?.Count(m => m.LastDataReceived.Date == DateTime.Today) ?? 0)</div>
                         </div>
                     </div>
                     <div class="stat-item">
-                        <i class="bi bi-graph-up"></i>
+                        <span class="stat-icon">📈</span>
                         <div class="stat-info">
                             <span>C2D Count</span>
-                            <h4>@(_machines?.Count(m => m.IsOnline) ?? 0)</h4>
+                            <div class="stat-value">@(_machines?.Count(m => m.IsOnline) ?? 0)</div>
                         </div>
                     </div>
                 </div>
+                <div class="stats-chart"></div>
             </div>
 
-            <!-- Devices List -->
+            <!-- Devices List Card -->
             <div class="devices-card">
                 <div class="card-header">
-                    <h3>List of Devices</h3>
-                    <button class="new-device-btn" @onclick="AddNewMachineAsync">New Device</button>
+                    <span>List of Devices</span>
+                    <button class="new-device-button" @onclick="AddNewMachineAsync">New Device</button>
                 </div>
-
-                <div class="table-container">
-                    <table class="devices-table">
-                        <thead>
-                            <tr>
-                                <th>DeviceId</th>
-                                <th>Location</th>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (_machines != null)
+                <table class="devices-table">
+                    <thead>
+                        <tr>
+                            <th>DeviceId</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (_machines != null)
+                        {
+                            @foreach (var machine in _machines)
                             {
-                                @foreach (var machine in _machines)
-                                {
-                                    <tr>
-                                        <td>@machine.Id</td>
-                                        <td>Stockholm</td>
-                                        <td>@machine.LastDataReceived.ToString("yyyy-MM-dd")</td>
-                                        <td>Weather Sensor</td>
-                                        <td>
-                                            <span class="status-badge @(machine.IsOnline ? "online" : "offline")">
-                                                @(machine.IsOnline ? "online" : "offline")
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="action-btn" @onclick="() => ToggleMachineStatusAsync(machine.Id)">
-                                                    <i class="bi bi-power"></i>
-                                                </button>
-                                                <button class="action-btn" @onclick="() => UpdateMachineDataAsync(machine.Id)">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="action-btn" @onclick="() => DeleteMachineAsync(machine.Id)">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td class="device-id">@machine.Id</td>
+                                    <td>Vega station</td>
+                                    <td>@machine.LastDataReceived.ToString("yyyy-MM-dd")</td>
+                                    <td>Weather Sensor temperature, humidity</td>
+                                    <td>
+                                        <span class="status-badge @(machine.IsOnline ? "online" : "offline")">
+                                            @(machine.IsOnline ? "online" : "offline")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn" @onclick="() => ToggleMachineStatusAsync(machine.Id)">⚡</button>
+                                            <button class="action-btn" @onclick="() => UpdateMachineDataAsync(machine.Id)">✏️</button>
+                                            <button class="action-btn" @onclick="() => DeleteMachineAsync(machine.Id)">🗑️</button>
+                                        </div>
+                                    </td>
+                                </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .page-container {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .top-nav {
+        background: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    .left-nav {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .right-nav {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .main-content {
+        padding: 2rem;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .stats-card, .devices-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stats-content {
+        padding: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .stats-chart {
+        height: 100px;
+        background: linear-gradient(180deg, rgba(255,198,0,0.2) 0%, rgba(255,198,0,0.1) 100%);
+        border-radius: 0 0 8px 8px;
+    }
+
+    .new-device-button {
+        background: #673ab7;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .devices-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .devices-table th,
+    .devices-table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .device-id {
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+    }
+
+    .status-badge.online {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.offline {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .icon-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+</style>
+
 
 @code {
     private List<Machine>? _machines;
