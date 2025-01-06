@@ -1,93 +1,110 @@
 ﻿@page "/"
-@rendermode RenderMode.InteractiveServer
 @using IndustrialMachineManagement.Models
 @using IndustrialMachineManagement.Services
 @inject IMachineService MachineService
-@inject IJSRuntime JS
 
-<PageTitle>Machine Management</PageTitle>
+<div class="management-central">
+    <div class="management-header">
+        <h1>Management Central</h1>
+        <div class="nav-icons">
+            <span class="nav-icon"><i class="bi bi-chat"></i></span>
+            <span class="nav-icon"><i class="bi bi-bar-chart"></i></span>
+            <span class="nav-icon"><i class="bi bi-gear"></i></span>
+        </div>
+    </div>
 
-<div class="container">
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card">
+    <div class="dashboard-section">
+        <h2>Dashboard</h2>
+        <p class="subtitle">Overview of your Internet of Things</p>
+        <p class="user-type">Manager User</p>
+
+        <div class="dashboard-content">
+            <!-- Daily Stats -->
+            <div class="stats-card">
                 <div class="card-header">
-                    <h3>Machine Statistics</h3>
+                    <h3>Daily Stats</h3>
+                    <button class="refresh-btn" @onclick="LoadMachinesAsync">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h5>Total Machines</h5>
-                            <p class="h2">@(_machines?.Count ?? 0)</p>
+
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <i class="bi bi-cpu"></i>
+                        <div class="stat-info">
+                            <span>Total Devices</span>
+                            <h4>@(_machines?.Count ?? 0)</h4>
                         </div>
-                        <div class="col-md-4">
-                            <h5>Online Machines</h5>
-                            <p class="h2">@(_machines?.Count(m => m.IsOnline) ?? 0)</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-plus-circle"></i>
+                        <div class="stat-info">
+                            <span>New Devices</span>
+                            <h4>@(_machines?.Count(m => m.LastDataReceived.Date == DateTime.Today) ?? 0)</h4>
                         </div>
-                        <div class="col-md-4">
-                            <h5>Offline Machines</h5>
-                            <p class="h2">@(_machines?.Count(m => !m.IsOnline) ?? 0)</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-graph-up"></i>
+                        <div class="stat-info">
+                            <span>C2D Count</span>
+                            <h4>@(_machines?.Count(m => m.IsOnline) ?? 0)</h4>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3>Machine List</h3>
-                    <button class="btn btn-primary" @onclick="AddNewMachineAsync">Add New Machine</button>
+            <!-- Devices List -->
+            <div class="devices-card">
+                <div class="card-header">
+                    <h3>List of Devices</h3>
+                    <button class="new-device-btn" @onclick="AddNewMachineAsync">New Device</button>
                 </div>
-                <div class="card-body">
-                    @if (_machines == null || !_machines.Any())
-                    {
-                        <p>No machines available.</p>
-                    }
-                    else
-                    {
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Last Data</th>
-                                    <th>Last Updated</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+
+                <div class="table-container">
+                    <table class="devices-table">
+                        <thead>
+                            <tr>
+                                <th>DeviceId</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (_machines != null)
+                            {
                                 @foreach (var machine in _machines)
                                 {
                                     <tr>
-                                        <td>@machine.Name</td>
+                                        <td>@machine.Id</td>
+                                        <td>Stockholm</td>
+                                        <td>@machine.LastDataReceived.ToString("yyyy-MM-dd")</td>
+                                        <td>Weather Sensor</td>
                                         <td>
-                                            <span class="badge @(machine.IsOnline ? "bg-success" : "bg-danger")">
-                                                @(machine.IsOnline ? "Online" : "Offline")
+                                            <span class="status-badge @(machine.IsOnline ? "online" : "offline")">
+                                                @(machine.IsOnline ? "online" : "offline")
                                             </span>
                                         </td>
-                                        <td>@machine.LastData</td>
-                                        <td>@machine.LastDataReceived.ToString("g")</td>
                                         <td>
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-sm btn-primary" @onclick="async () => await ToggleMachineStatusAsync(machine.Id)">
-                                                    @(machine.IsOnline ? "Turn Off" : "Turn On")
+                                            <div class="action-buttons">
+                                                <button class="action-btn" @onclick="() => ToggleMachineStatusAsync(machine.Id)">
+                                                    <i class="bi bi-power"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-info" @onclick="async () => await UpdateMachineDataAsync(machine.Id)">
-                                                    Update Data
+                                                <button class="action-btn" @onclick="() => UpdateMachineDataAsync(machine.Id)">
+                                                    <i class="bi bi-pencil"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-danger" @onclick="async () => await DeleteMachineAsync(machine.Id)">
-                                                    Delete
+                                                <button class="action-btn" @onclick="() => DeleteMachineAsync(machine.Id)">
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    }
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -104,79 +121,42 @@
 
     private async Task LoadMachinesAsync()
     {
-        try
-        {
-            _machines = await MachineService.GetAllMachinesAsync();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error loading machines: {ex.Message}");
-        }
+        _machines = await MachineService.GetAllMachinesAsync();
+        StateHasChanged();
     }
 
     private async Task AddNewMachineAsync()
     {
-        try
-        {
-            var machine = new Machine
-                {
-                    Name = $"Machine {(_machines?.Count ?? 0) + 1}",
-                    IsOnline = true,
-                    LastDataReceived = DateTime.Now,
-                    LastData = "Initial Data"
-                };
+        var machine = new Machine
+            {
+                Name = $"Device {(_machines?.Count ?? 0) + 1}",
+                IsOnline = true,
+                LastDataReceived = DateTime.Now,
+                LastData = "Temperature: 25°C, Humidity: 60%"
+            };
 
-            await MachineService.AddMachineAsync(machine);
-            await LoadMachinesAsync();
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error adding machine: {ex.Message}");
-        }
+        await MachineService.AddMachineAsync(machine);
+        await LoadMachinesAsync();
     }
 
     private async Task ToggleMachineStatusAsync(Guid id)
     {
-        try
-        {
-            await MachineService.ToggleMachineStatusAsync(id);
-            await LoadMachinesAsync();
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error toggling machine status: {ex.Message}");
-        }
+        await MachineService.ToggleMachineStatusAsync(id);
+        await LoadMachinesAsync();
     }
 
     private async Task UpdateMachineDataAsync(Guid id)
     {
-        try
-        {
-            var newData = $"Temperature: {Random.Shared.Next(20, 30)}°C";
-            await MachineService.UpdateMachineDataAsync(id, newData);
-            await LoadMachinesAsync();
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error updating machine data: {ex.Message}");
-        }
+        var temp = Random.Shared.Next(20, 30);
+        var humidity = Random.Shared.Next(40, 80);
+        var newData = $"Temperature: {temp}°C, Humidity: {humidity}%";
+        await MachineService.UpdateMachineDataAsync(id, newData);
+        await LoadMachinesAsync();
     }
 
     private async Task DeleteMachineAsync(Guid id)
     {
-        try
-        {
-            bool confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this machine?");
-            if (confirmed)
-            {
-                await MachineService.DeleteMachineAsync(id);
-                await LoadMachinesAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error deleting machine: {ex.Message}");
-        }
+        await MachineService.DeleteMachineAsync(id);
+        await LoadMachinesAsync();
     }
 }

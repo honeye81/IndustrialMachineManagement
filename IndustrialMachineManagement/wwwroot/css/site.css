@@ -1,0 +1,102 @@
+﻿.dashboard-container {
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+    .dashboard-header h1 {
+        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+    }
+
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+}
+
+.stats-card, .devices-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card {
+    border: none;
+    background: transparent;
+}
+
+.stat-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.bg-purple {
+    background-color: #6f42c1;
+}
+
+.bg-blue {
+    background-color: #0d6efd;
+}
+
+.bg-green {
+    background-color: #198754;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+    .action-buttons .btn-link {
+        color: #6c757d;
+        padding: 0.25rem;
+    }
+
+        .action-buttons .btn-link:hover {
+            color: #0d6efd;
+        }
+
+.badge {
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.bg-success {
+    background-color: #d1e7dd !important;
+    color: #0f5132 !important;
+}
+
+.bg-danger {
+    background-color: #f8d7da !important;
+    color: #842029 !important;
+}
