@@ -13,7 +13,7 @@ namespace IndustrialMachineManagement.Services
                 Id = Guid.NewGuid(),
                 Name = "Machine 1",
                 IsOnline = true,
-                LastDataReceived = DateTime.Now,
+                LastDataReceived = DateTime.Now.AddDays(-1) ,
                 LastData = "Temperature: 25°C"
             });
         }
